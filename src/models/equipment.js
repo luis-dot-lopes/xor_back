@@ -4,6 +4,10 @@ export default (sequelize, DataTypes) => {
       marca: { type: DataTypes.STRING, allowNull: false },
       modelo: { type: DataTypes.STRING, allowNull: false },
       categoria: { type: DataTypes.STRING, allowNull: false },
+      imagem: {
+      type: DataTypes.STRING, 
+      allowNull: true
+}
     });
   
     Equipment.associate = (models) => {
