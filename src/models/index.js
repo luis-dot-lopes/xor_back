@@ -11,7 +11,7 @@ models.User = UserModel(sequelize, DataTypes);
 models.Equipment = EquipmentModel(sequelize, DataTypes);
 models.Loan = LoanModel(sequelize, DataTypes);
 
-// Associações
+
 Object.values(models).forEach(model => {
   if (model.associate) {
     model.associate(models);

@@ -1,7 +1,13 @@
 import db from '../models/index.js';
 
 export const createLoan = async (userId, equipmentId) => {
-  return await db.Loan.create({ userId, equipmentId });
+  const loan = await db.Loan.create({ userId, equipmentId });
+
+  await loan.reload({
+    include: ['usuario', 'equipamento']
+  });
+
+  return loan;
 };
 
 export const returnLoan = async (id) => {
