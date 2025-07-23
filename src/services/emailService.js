@@ -1,20 +1,21 @@
-const nodemailer = require("nodemailer");
+import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-async function sendConfirmationEmail(to, subject, htmlContent) {
-  return transporter.sendMail({
-    from: `"Equip Manager" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html: htmlContent,
+export async function sendConfirmationEmail(email, privateToken) {
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: process.env.EMAIL_FROM,
+      pass: process.env.EMAIL_PASS,
+    },
   });
-}
 
-module.exports = { sendConfirmationEmail };
+  const link = `https://seusite.com/user/loans/${privateToken}`;
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: 'Confirmação de Empréstimo',
+    html: `<p>Seu empréstimo foi registrado com sucesso.</p><p>Acesse seus dados clicando no link abaixo:</p><a href="${link}">${link}</a>`,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
