@@ -1,14 +1,16 @@
-import db from '../models/index.js';
+import db from "../models/index.js";
 
 export async function userTokenMiddleware(req, res, next) {
   const token = req.params.token || req.query.token;
-  if (!token) return res.status(401).json({ message: 'Token de acesso não fornecido' });
+  if (!token)
+    return res.status(401).json({ message: "Token de acesso não fornecido" });
 
-  const loan = await db.Loan.findOne({ where: { privateToken: token } });
+  const user = await db.User.findOne({ where: { privateToken: token } });
 
-  if (!loan) return res.status(403).json({ message: 'Token inválido ou expirado' });
+  if (!user)
+    return res.status(403).json({ message: "Token inválido ou expirado" });
 
-  req.userIdFromToken = loan.userId;
+  req.userIdFromToken = user.id;
   req.privateToken = token;
   next();
 }

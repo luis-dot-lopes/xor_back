@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 export default (sequelize, DataTypes) => {
   const Loan = sequelize.define("Loan", {
     dataEmprestimo: {
@@ -14,10 +12,6 @@ export default (sequelize, DataTypes) => {
     dataDevolucao: {
       type: DataTypes.DATE,
       allowNull: true,
-    },
-    privateToken: {
-      type: DataTypes.STRING,
-      defaultValue: () => uuidv4(),
     },
     userId: {
       type: DataTypes.INTEGER,

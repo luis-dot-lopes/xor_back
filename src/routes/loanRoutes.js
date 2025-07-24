@@ -12,12 +12,12 @@ router.put("/:id", authMiddleware, controller.updateLoanStatus);
 router.delete("/:id", authMiddleware, controller.deleteLoan);
 
 router.get(
-  "/user/loans/:token",
+  "/user/:token",
   userTokenMiddleware,
   controller.getUserLoansByToken
 );
 router.get(
-  "/user/loan/:id/:token",
+  "/user/:id/:token",
   userTokenMiddleware,
   controller.getUserLoanById
 );

@@ -1,5 +1,6 @@
 import * as userService from "../services/userService.js";
 import { userSchema } from "../validations/userValidation.js";
+import { z } from "zod";
 
 export const create = async (req, res) => {
   try {

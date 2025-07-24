@@ -42,27 +42,36 @@ export const findById = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const parsed = equipmentSchema.parse(req.body);
-    const imagePath = req.file;
+
+    const imageName = req.file ? req.file.filename : null;
+
+    const dataToUpdate = {
+      ...parsed,
+    };
+
+    if (imageName) {
+      dataToUpdate.imagem = imageName;
+    }
 
     const updated = await equipmentService.updateEquipment(
       req.params.id,
       req.userId,
-      {
-        ...parsed,
-        imagem: imagePath,
-      }
+      dataToUpdate
     );
 
-    if (!updated)
+    if (!updated) {
       return res
         .status(404)
         .json({ message: "Equipamento não encontrado ou sem permissão" });
+    }
 
     res.json(updated);
   } catch (error) {
-    if (error.name === "ZodError") {
-      return res.status(400).json({ errors: error.errors });
+    if (error instanceof z.ZodError) {
+      const messages = error.issues.map((err) => err.message);
+      return res.status(400).json({ errors: messages });
     }
+
     console.error(error);
     res.status(500).json({ message: "Erro ao atualizar equipamento" });
   }
