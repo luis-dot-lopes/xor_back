@@ -7,6 +7,7 @@ export const createEquipment = async (data) => {
 export const getAllEquipmentsByAdmId = async (admId) => {
   return await db.Equipment.findAll({
     where: { admId },
+    order: [["id", "ASC"]],
   });
 };
 

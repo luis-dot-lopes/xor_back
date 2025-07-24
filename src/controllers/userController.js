@@ -1,24 +1,14 @@
 import * as userService from "../services/userService.js";
 import { userSchema } from "../validations/userValidation.js";
-import { z } from "zod";
+import { handleError } from "../utils/errorHandler.js";
 
 export const create = async (req, res) => {
   try {
     const parsed = userSchema.parse(req.body);
-
-    const user = await userService.createUser({
-      ...parsed,
-      admId: req.userId,
-    });
-
+    const user = await userService.createUser({ ...parsed, admId: req.userId });
     res.status(201).json(user);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const messages = error.issues.map((i) => i.message);
-      return res.status(400).json({ errors: messages });
-    }
-    console.error(error);
-    res.status(500).json({ message: "Erro ao criar usuário" });
+    return handleError(res, error, "Erro ao criar usuário");
   }
 };
 
@@ -36,7 +26,6 @@ export const findById = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const parsed = userSchema.parse(req.body);
-
     const updated = await userService.updateUser(
       req.params.id,
       req.userId,
@@ -50,12 +39,7 @@ export const update = async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const messages = error.issues.map((i) => i.message);
-      return res.status(400).json({ errors: messages });
-    }
-    console.error(error);
-    res.status(500).json({ message: "Erro ao atualizar usuário" });
+    return handleError(res, error, "Erro ao atualizar usuário");
   }
 };
 
@@ -65,5 +49,6 @@ export const remove = async (req, res) => {
     return res
       .status(404)
       .json({ message: "Usuário não encontrado ou sem permissão" });
+
   res.status(204).send();
 };

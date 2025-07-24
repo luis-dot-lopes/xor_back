@@ -1,5 +1,8 @@
 import db from "../models/index.js";
+import { handleError } from "../utils/errorHandler.js";
 import { sendConfirmationEmail } from "../services/emailService.js";
+
+const verificarAutorizacaoAdm = (loan, userId) => loan.admId === userId;
 
 export const createLoan = async (req, res) => {
   try {
@@ -35,82 +38,98 @@ export const createLoan = async (req, res) => {
 
     res.status(201).json(loan);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao criar empréstimo");
   }
 };
 
 export const getAllLoans = async (req, res) => {
   try {
     const loans = await db.Loan.findAll({
+      where: { admId: req.userId },
       attributes: ["status", "id"],
+      order: [["id", "ASC"]],
       include: [
-        {
-          association: "equipamento",
-          attributes: ["nome", "id"],
-        },
-        {
-          association: "usuario",
-          attributes: ["nome", "email"],
-        },
+        { association: "equipamento", attributes: ["nome", "id"] },
+        { association: "usuario", attributes: ["nome", "email"] },
       ],
     });
 
     res.json(
       loans.map((loan) => ({
         id: loan.id,
+        status: loan.status,
         nomeEquipamento: loan.equipamento.nome,
         nomeUsuario: loan.usuario.nome,
         emailUsuario: loan.usuario.email,
       }))
     );
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao buscar empréstimos");
   }
 };
 
 export const getLoanById = async (req, res) => {
   try {
     const loan = await db.Loan.findByPk(req.params.id, {
-      include: ["usuario", "equipamento", "administrador"],
+      attributes: ["status", "id", "admId"],
+      include: [
+        { association: "equipamento", attributes: ["nome", "id"] },
+        { association: "usuario", attributes: ["nome", "email", "cpf"] },
+      ],
     });
 
     if (!loan)
       return res.status(404).json({ message: "Empréstimo não encontrado" });
 
-    res.json(loan);
+    if (!verificarAutorizacaoAdm(loan, req.userId))
+      return res.status(403).json({ message: "Acesso negado" });
+
+    return res.json({
+      id: loan.id,
+      status: loan.status,
+      cpfUsuario: loan.usuario.cpf,
+      nomeEquipamento: loan.equipamento.nome,
+      nomeUsuario: loan.usuario.nome,
+      emailUsuario: loan.usuario.email,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao buscar empréstimo");
   }
 };
 
 export const updateLoanStatus = async (req, res) => {
   try {
-    const { status, dataDevolucao } = req.body;
     const loan = await db.Loan.findByPk(req.params.id);
 
     if (!loan)
       return res.status(404).json({ message: "Empréstimo não encontrado" });
 
-    if (status) loan.status = status;
-    if (dataDevolucao) loan.dataDevolucao = dataDevolucao;
+    if (!verificarAutorizacaoAdm(loan, req.userId))
+      return res.status(403).json({ message: "Acesso negado" });
 
+    loan.status = "Finalizado";
     await loan.save();
-    res.json(loan);
+
+    res.json({ message: "Status atualizado para Finalizado", loan });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao atualizar status");
   }
 };
 
 export const deleteLoan = async (req, res) => {
   try {
     const loan = await db.Loan.findByPk(req.params.id);
+
     if (!loan)
       return res.status(404).json({ message: "Empréstimo não encontrado" });
+
+    if (!verificarAutorizacaoAdm(loan, req.userId))
+      return res.status(403).json({ message: "Acesso negado" });
 
     await loan.destroy();
     res.status(204).end();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao remover empréstimo");
   }
 };
 
@@ -126,11 +145,12 @@ export const getUserLoansByToken = async (req, res) => {
     const loans = await db.Loan.findAll({
       where: { userId: user.id },
       include: ["equipamento"],
+      order: [["id", "ASC"]],
     });
 
     res.json(loans);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao buscar empréstimos do usuário");
   }
 };
 
@@ -153,6 +173,6 @@ export const getUserLoanById = async (req, res) => {
 
     res.json(loan);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return handleError(res, error, "Erro ao buscar empréstimo do usuário");
   }
 };

@@ -7,6 +7,7 @@ export const createUser = async (data) => {
 export const getAllUsersByAdmId = async (admId) => {
   return await db.User.findAll({
     where: { admId },
+    order: [["id", "ASC"]],
   });
 };
 
