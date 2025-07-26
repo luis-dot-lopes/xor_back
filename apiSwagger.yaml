@@ -1,0 +1,303 @@
+
+openapi: 3.0.0
+info:
+  title: Equipment Manager API
+  version: 1.0.0
+  description: API para gerenciamento de usuários, equipamentos e empréstimos
+servers:
+  - url: http://localhost:3000
+paths:
+  /register:
+    post:
+      summary: Registro de novo usuário
+      tags:
+        - Autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - email
+                - senha
+              properties:
+                nome:
+                  type: string
+                email:
+                  type: string
+                senha:
+                  type: string
+      responses:
+        '201':
+          description: Usuário registrado com sucesso
+
+  /login:
+    post:
+      summary: Login de usuário
+      tags:
+        - Autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - senha
+              properties:
+                email:
+                  type: string
+                senha:
+                  type: string
+      responses:
+        '200':
+          description: Login realizado com sucesso, retorna token JWT
+
+  /equipments:
+    get:
+      summary: Listar todos os equipamentos
+      tags:
+        - Equipamentos
+      responses:
+        '200':
+          description: Lista de equipamentos retornada
+    post:
+      summary: Cadastrar novo equipamento
+      tags:
+        - Equipamentos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                descricao:
+                  type: string
+                numero_serie:
+                  type: string
+      responses:
+        '201':
+          description: Equipamento criado com sucesso
+
+  /equipments/{id}:
+    get:
+      summary: Obter equipamento por ID
+      tags:
+        - Equipamentos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalhes do equipamento
+    put:
+      summary: Atualizar equipamento por ID
+      tags:
+        - Equipamentos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                descricao:
+                  type: string
+      responses:
+        '200':
+          description: Equipamento atualizado
+    delete:
+      summary: Remover equipamento por ID
+      tags:
+        - Equipamentos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Equipamento removido com sucesso
+
+  /loans:
+    get:
+      summary: Listar todos os empréstimos
+      tags:
+        - Empréstimos
+      responses:
+        '200':
+          description: Lista de empréstimos retornada
+    post:
+      summary: Criar novo empréstimo
+      tags:
+        - Empréstimos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                equipmentId:
+                  type: integer
+                dataInicio:
+                  type: string
+                  format: date
+                dataFim:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Empréstimo criado com sucesso
+
+  /loans/{id}:
+    get:
+      summary: Obter empréstimo por ID
+      tags:
+        - Empréstimos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalhes do empréstimo
+    put:
+      summary: Atualizar empréstimo
+      tags:
+        - Empréstimos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dataFim:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Empréstimo atualizado
+    delete:
+      summary: Excluir empréstimo
+      tags:
+        - Empréstimos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Empréstimo excluído com sucesso
+
+  /users:
+    get:
+      summary: Listar usuários
+      tags:
+        - Usuários
+      responses:
+        '200':
+          description: Lista de usuários
+    post:
+      summary: Criar novo usuário (admin)
+      tags:
+        - Usuários
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                email:
+                  type: string
+                senha:
+                  type: string
+      responses:
+        '201':
+          description: Usuário criado
+
+  /users/{id}:
+    get:
+      summary: Obter usuário por ID
+      tags:
+        - Usuários
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dados do usuário
+    put:
+      summary: Atualizar dados do usuário
+      tags:
+        - Usuários
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Usuário atualizado
+    delete:
+      summary: Excluir usuário
+      tags:
+        - Usuários
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Usuário excluído com sucesso
