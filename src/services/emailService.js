@@ -9,7 +9,7 @@ export async function sendConfirmationEmail(email, privateToken) {
     },
   });
 
-  const link = `${process.env.URL_SITE}${privateToken}`;
+  const link = `${process.env.URL_SITE}/usuario-emprestimos/${privateToken}`;
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,

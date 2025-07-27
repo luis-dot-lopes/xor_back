@@ -27,7 +27,7 @@ export const getLoansByAdmId = async (admId) => {
       { model: db.User, as: "usuario" },
       { model: db.Equipment, as: "equipamento" },
     ],
-    order: [["id", "ASC"]],
+    order: [["id", "DESC"]],
   });
 };
 
@@ -38,26 +38,6 @@ export const getLoansByUserId = async (userId) => {
       { model: db.User, as: "usuario" },
       { model: db.Equipment, as: "equipamento" },
     ],
-    order: [["id", "ASC"]],
-  });
-};
-
-export const getLoanByIdAndAdmId = async (id, admId) => {
-  return await db.Loan.findOne({
-    where: { id, admId },
-    include: [
-      { model: db.User, as: "usuario" },
-      { model: db.Equipment, as: "equipamento" },
-    ],
-  });
-};
-
-export const getLoanByIdAndUserId = async (id, userId) => {
-  return await db.Loan.findOne({
-    where: { id, userId },
-    include: [
-      { model: db.User, as: "usuario" },
-      { model: db.Equipment, as: "equipamento" },
-    ],
+    order: [["id", "DESC"]],
   });
 };

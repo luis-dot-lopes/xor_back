@@ -47,7 +47,7 @@ export const getAllLoans = async (req, res) => {
     const loans = await db.Loan.findAll({
       where: { admId: req.userId },
       attributes: ["status", "id"],
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
       include: [
         { association: "equipamento", attributes: ["nome", "id"] },
         { association: "usuario", attributes: ["nome", "email"] },
@@ -144,11 +144,23 @@ export const getUserLoansByToken = async (req, res) => {
 
     const loans = await db.Loan.findAll({
       where: { userId: user.id },
-      include: ["equipamento"],
-      order: [["id", "ASC"]],
+      attributes: ["status", "id"],
+      order: [["id", "DESC"]],
+      include: [
+        { association: "equipamento", attributes: ["nome", "id"] },
+        { association: "usuario", attributes: ["nome", "email"] },
+      ],
     });
 
-    res.json(loans);
+    res.json(
+      loans.map((loan) => ({
+        id: loan.id,
+        status: loan.status,
+        nomeEquipamento: loan.equipamento.nome,
+        nomeUsuario: loan.usuario.nome,
+        emailUsuario: loan.usuario.email,
+      }))
+    );
   } catch (error) {
     return handleError(res, error, "Erro ao buscar empréstimos do usuário");
   }
@@ -165,13 +177,24 @@ export const getUserLoanById = async (req, res) => {
 
     const loan = await db.Loan.findOne({
       where: { id, userId: user.id },
-      include: ["equipamento"],
+      attributes: ["status", "id", "admId"],
+      include: [
+        { association: "equipamento", attributes: ["nome", "id"] },
+        { association: "usuario", attributes: ["nome", "email", "cpf"] },
+      ],
     });
 
     if (!loan)
       return res.status(404).json({ message: "Empréstimo não encontrado" });
 
-    res.json(loan);
+    return res.json({
+      id: loan.id,
+      status: loan.status,
+      cpfUsuario: loan.usuario.cpf,
+      nomeEquipamento: loan.equipamento.nome,
+      nomeUsuario: loan.usuario.nome,
+      emailUsuario: loan.usuario.email,
+    });
   } catch (error) {
     return handleError(res, error, "Erro ao buscar empréstimo do usuário");
   }

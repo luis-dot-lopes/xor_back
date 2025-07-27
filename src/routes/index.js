@@ -11,6 +11,6 @@ router.use("/auth", authRoutes);
 router.use("/users", authMiddleware, userRoutes);
 router.use("/equipments", authMiddleware, equipmentRoutes);
 router.use("/loans", loanRoutes);
-router.use("/adm", admRoutes);
+router.use("/adm", authMiddleware, admRoutes);
 
 export default router;

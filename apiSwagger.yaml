@@ -1,93 +1,104 @@
-
 openapi: 3.0.0
 info:
   title: Equipment Manager API
   version: 1.0.0
   description: API para gerenciamento de usuários, equipamentos e empréstimos
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:8080/api
 paths:
   /register:
     post:
-      summary: Registro de novo usuário
-      tags:
-        - Autenticação
+      summary: Registro de novo administrador
+      tags: [Autenticação]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - nome
-                - email
-                - senha
-              properties:
-                nome:
-                  type: string
-                email:
-                  type: string
-                senha:
-                  type: string
+              $ref: "#/components/schemas/AdminRegisterInput"
       responses:
-        '201':
-          description: Usuário registrado com sucesso
+        "201":
+          description: Administrador registrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admin"
+        "400":
+          description: Email ou CPF já cadastrados
 
   /login:
     post:
-      summary: Login de usuário
-      tags:
-        - Autenticação
+      summary: Login de administrador
+      tags: [Autenticação]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - email
-                - senha
-              properties:
-                email:
-                  type: string
-                senha:
-                  type: string
+              $ref: "#/components/schemas/LoginInput"
       responses:
-        '200':
-          description: Login realizado com sucesso, retorna token JWT
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Credenciais inválidas
+
+  /adm/me:
+    get:
+      summary: Obter dados do administrador autenticado
+      tags: [Autenticação]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dados do administrador autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admin"
+        "401":
+          description: Não autorizado
 
   /equipments:
     get:
       summary: Listar todos os equipamentos
+      security:
+        - bearerAuth: []
       tags:
         - Equipamentos
       responses:
-        '200':
+        "200":
           description: Lista de equipamentos retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Equipment"
     post:
       summary: Cadastrar novo equipamento
+      security:
+        - bearerAuth: []
       tags:
         - Equipamentos
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              type: object
-              properties:
-                nome:
-                  type: string
-                descricao:
-                  type: string
-                numero_serie:
-                  type: string
+              $ref: "#/components/schemas/EquipmentInput"
       responses:
-        '201':
+        "201":
           description: Equipamento criado com sucesso
 
   /equipments/{id}:
     get:
       summary: Obter equipamento por ID
+      security:
+        - bearerAuth: []
       tags:
         - Equipamentos
       parameters:
@@ -97,10 +108,16 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: Detalhes do equipamento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Equipment"
     put:
       summary: Atualizar equipamento por ID
+      security:
+        - bearerAuth: []
       tags:
         - Equipamentos
       parameters:
@@ -112,19 +129,16 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              type: object
-              properties:
-                nome:
-                  type: string
-                descricao:
-                  type: string
+              $ref: "#/components/schemas/EquipmentInput"
       responses:
-        '200':
-          description: Equipamento atualizado
+        "200":
+          description: Equipamento atualizado com sucesso
     delete:
       summary: Remover equipamento por ID
+      security:
+        - bearerAuth: []
       tags:
         - Equipamentos
       parameters:
@@ -134,47 +148,58 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        "204":
           description: Equipamento removido com sucesso
 
   /loans:
-    get:
-      summary: Listar todos os empréstimos
-      tags:
-        - Empréstimos
-      responses:
-        '200':
-          description: Lista de empréstimos retornada
     post:
-      summary: Criar novo empréstimo
       tags:
         - Empréstimos
+      summary: Criar um novo empréstimo (admId vem do middleware)
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                userId:
-                  type: integer
-                equipmentId:
-                  type: integer
-                dataInicio:
-                  type: string
-                  format: date
-                dataFim:
-                  type: string
-                  format: date
+              $ref: "#/components/schemas/LoanInput"
       responses:
-        '201':
+        "201":
           description: Empréstimo criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+        "400":
+          description: Equipamento já emprestado ou dados inválidos
+        "401":
+          description: Não autorizado
+    get:
+      tags:
+        - Empréstimos
+      summary: Listar todos os empréstimos
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de empréstimos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+        "401":
+          description: Não autorizado
 
   /loans/{id}:
     get:
-      summary: Obter empréstimo por ID
       tags:
         - Empréstimos
+      summary: Obter empréstimo por ID
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -182,12 +207,22 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: Detalhes do empréstimo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+        "404":
+          description: Empréstimo não encontrado
+        "401":
+          description: Não autorizado
     put:
-      summary: Atualizar empréstimo
       tags:
         - Empréstimos
+      summary: Atualizar status do empréstimo (realizar devolução)
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -195,22 +230,20 @@ paths:
           schema:
             type: integer
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dataFim:
-                  type: string
-                  format: date
+        required: false
       responses:
-        '200':
-          description: Empréstimo atualizado
+        "200":
+          description: Status atualizado
+        "404":
+          description: Empréstimo não encontrado
+        "401":
+          description: Não autorizado
     delete:
-      summary: Excluir empréstimo
       tags:
         - Empréstimos
+      summary: Excluir empréstimo
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -218,19 +251,82 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
-          description: Empréstimo excluído com sucesso
+        "204":
+          description: Empréstimo excluído
+        "404":
+          description: Empréstimo não encontrado
+        "401":
+          description: Não autorizado
+
+  /loans/user/{token}:
+    get:
+      tags:
+        - Empréstimos
+      summary: Listar empréstimos de um usuário por token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de empréstimos do usuário
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+        "403":
+          description: Token inválido
+
+  /loans/user/{id}/{token}:
+    get:
+      tags:
+        - Empréstimos
+      summary: Obter um empréstimo específico de um usuário pelo token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Empréstimo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Loan"
+        "403":
+          description: Token inválido
 
   /users:
     get:
       summary: Listar usuários
+      security:
+        - bearerAuth: []
       tags:
         - Usuários
       responses:
-        '200':
+        "200":
           description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
     post:
-      summary: Criar novo usuário (admin)
+      summary: Criar novo usuário
+      security:
+        - bearerAuth: []
       tags:
         - Usuários
       requestBody:
@@ -238,58 +334,74 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                nome:
-                  type: string
-                email:
-                  type: string
-                senha:
-                  type: string
+              $ref: "#/components/schemas/UserInput"
       responses:
-        '201':
-          description: Usuário criado
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Dados inválidos ou CPF/Email já cadastrado
 
   /users/{id}:
     get:
       summary: Obter usuário por ID
+      security:
+        - bearerAuth: []
       tags:
         - Usuários
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
+          description: ID do usuário
       responses:
-        '200':
-          description: Dados do usuário
+        "200":
+          description: Usuário encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Usuário não encontrado
     put:
-      summary: Atualizar dados do usuário
+      summary: Atualizar dados de um usuário
+      security:
+        - bearerAuth: []
       tags:
         - Usuários
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
+          description: ID do usuário a ser atualizado
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                nome:
-                  type: string
-                email:
-                  type: string
+              $ref: "#/components/schemas/UserInput"
       responses:
-        '200':
-          description: Usuário atualizado
+        "200":
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Dados inválidos
+        "404":
+          description: Usuário não encontrado
     delete:
       summary: Excluir usuário
+      security:
+        - bearerAuth: []
       tags:
         - Usuários
       parameters:
@@ -299,5 +411,248 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        "204":
           description: Usuário excluído com sucesso
+
+components:
+  schemas:
+    AdminRegisterInput:
+      type: object
+      required: [nome, email, senha, cpf, telefone]
+      properties:
+        nome:
+          type: string
+          example: Lucas Maia
+        email:
+          type: string
+          format: email
+          example: lucas@email.com
+        senha:
+          type: string
+          example: minhasenha123
+        cpf:
+          type: string
+          example: "123.456.789-00"
+        telefone:
+          type: string
+          example: "(85)999999999"
+
+    Admin:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: Lucas Maia
+        email:
+          type: string
+          format: email
+          example: lucas@email.com
+        cpf:
+          type: string
+          example: "123.456.789-00"
+        telefone:
+          type: string
+          example: "(85)999999999"
+
+    LoginInput:
+      type: object
+      required: [email, senha]
+      properties:
+        email:
+          type: string
+          format: email
+          example: lucas@email.com
+        senha:
+          type: string
+          example: minhasenha123
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        nome:
+          type: string
+          example: "Notebook X"
+        marca:
+          type: string
+          example: "Acer"
+        modelo:
+          type: string
+          example: "Nitro 5"
+        categoria:
+          type: string
+          example: "Informática"
+        imagem:
+          type: string
+          example: "1753382054088-724710908.jpg"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-07-24T00:20:33.407Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-07-24T18:34:14.389Z"
+
+    EquipmentInput:
+      type: object
+      required: [nome, marca, modelo, categoria, imagem]
+      properties:
+        nome:
+          type: string
+          example: "Notebook"
+        marca:
+          type: string
+          example: "Acer"
+        modelo:
+          type: string
+          example: "Nitro V1"
+        categoria:
+          type: string
+          example: "Informática"
+        imagem:
+          type: string
+          format: binary
+
+    LoanInput:
+      type: object
+      required: [userId, equipmentId]
+      properties:
+        userId:
+          type: integer
+          example: 123
+        equipmentId:
+          type: integer
+          example: 456
+
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 11
+        status:
+          type: string
+          example: Finalizado
+        nomeEquipamento:
+          type: string
+          example: Notebook X
+        nomeUsuario:
+          type: string
+          example: Lucas
+        emailUsuario:
+          type: string
+          format: email
+          example: antonia00sousa00@gmail.com
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        nome:
+          type: string
+          example: Lucas
+        email:
+          type: string
+          format: email
+          example: antonia00sousa00@gmail.com
+        telefone:
+          type: string
+          example: "(12)3123-1232"
+        endereco:
+          type: string
+          example: Endereço X
+        cpf:
+          type: string
+          example: "123.323.232-32"
+        logradouro:
+          type: string
+          example: Logradouro
+        cidade:
+          type: string
+          example: Cidade X
+        estado:
+          type: string
+          example: Estado X
+        cep:
+          type: string
+          example: "12312-312"
+        numero:
+          type: string
+          example: "1"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-07-24T02:59:51.516Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-07-24T02:59:51.516Z"
+
+    UserInput:
+      type: object
+      required:
+        [
+          nome,
+          email,
+          telefone,
+          endereco,
+          cep,
+          cpf,
+          logradouro,
+          cidade,
+          estado,
+          numero,
+        ]
+      properties:
+        nome:
+          type: string
+          example: Lucas
+        email:
+          type: string
+          format: email
+          example: email@gmail.com
+        telefone:
+          type: string
+          example: "(12)3123-1231"
+        endereco:
+          type: string
+          example: Rua X
+        cep:
+          type: string
+          example: "12332-323"
+        cpf:
+          type: string
+          example: "123.123.131-23"
+        logradouro:
+          type: string
+          example: Logradouro X
+        cidade:
+          type: string
+          example: Cidade X
+        estado:
+          type: string
+          example: Estado X
+        numero:
+          type: string
+          example: "20"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

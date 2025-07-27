@@ -7,13 +7,15 @@ export const createUser = async (data) => {
 export const getAllUsersByAdmId = async (admId) => {
   return await db.User.findAll({
     where: { admId },
-    order: [["id", "ASC"]],
+    order: [["id", "DESC"]],
+    attributes: { exclude: ["privateToken", "admId"] },
   });
 };
 
 export const getUserById = async (id, admId) => {
   return await db.User.findOne({
     where: { id, admId },
+    attributes: { exclude: ["privateToken", "admId"] },
   });
 };
 

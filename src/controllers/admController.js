@@ -1,7 +1,10 @@
+import { handleError } from "../utils/errorHandler.js";
+import db from "../models/index.js";
+
 export const getProfile = async (req, res) => {
   try {
     const admin = await db.Adm.findByPk(req.userId, {
-      attributes: { exclude: ["senha"] },
+      attributes: { exclude: ["senha", "createdAt", "updatedAt"] },
     });
 
     if (!admin) {

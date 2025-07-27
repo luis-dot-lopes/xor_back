@@ -21,7 +21,9 @@ export const create = async (req, res) => {
 
 export const findAll = async (req, res) => {
   try {
-    const equipments = await equipmentService.getAllEquipmentsByAdmId(req.userId);
+    const equipments = await equipmentService.getAllEquipmentsByAdmId(
+      req.userId
+    );
     res.json(equipments);
   } catch (error) {
     return handleError(res, error, "Erro ao buscar equipamentos");
@@ -30,7 +32,10 @@ export const findAll = async (req, res) => {
 
 export const findById = async (req, res) => {
   try {
-    const equipment = await equipmentService.getEquipmentById(req.params.id, req.userId);
+    const equipment = await equipmentService.getEquipmentById(
+      req.params.id,
+      req.userId
+    );
     if (!equipment)
       return res.status(404).json({ message: "Equipamento não encontrado" });
 
@@ -68,7 +73,10 @@ export const update = async (req, res) => {
 
 export const remove = async (req, res) => {
   try {
-    const deleted = await equipmentService.deleteEquipment(req.params.id, req.userId);
+    const deleted = await equipmentService.deleteEquipment(
+      req.params.id,
+      req.userId
+    );
     if (!deleted) {
       return res
         .status(404)
