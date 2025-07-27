@@ -10,7 +10,6 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares e rotas
 app.use(express.json());
 app.use(cors());
 
@@ -19,7 +18,7 @@ app.use("/imagens", express.static(path.resolve("src/resources/imagens")));
 
 app.use("/api-docs", swagger.serve, swagger.setup);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 models.sequelize
   .sync({ alter: true })
