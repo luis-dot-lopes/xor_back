@@ -24,17 +24,5 @@ export default (sequelize, DataTypes) => {
     numero: DataTypes.STRING,
   });
 
-  User.associate = (models) => {
-    User.hasMany(models.Loan, { foreignKey: "userId", as: "emprestimos" });
-
-    User.belongsTo(models.Adm, {
-      foreignKey: {
-        name: "admId",
-        allowNull: false,
-      },
-      as: "administrador",
-    });
-  };
-
   return User;
 };

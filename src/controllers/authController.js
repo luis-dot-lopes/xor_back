@@ -12,10 +12,6 @@ export const register = async (req, res) => {
     if (emailExists)
       return res.status(400).json({ message: "Email já cadastrado" });
 
-    const cpfExists = await db.Adm.findOne({ where: { cpf: data.cpf } });
-    if (cpfExists)
-      return res.status(400).json({ message: "CPF já cadastrado" });
-
     const hashedPassword = await bcrypt.hash(data.senha, 10);
 
     const user = await db.Adm.create({
@@ -35,7 +31,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const { email, senha } = req.body;
 
-  const user = await db.Adm.findOne({ where: { email } });
+  const user = await db.User.findOne({ where: { email } });
   if (!user) return res.status(401).json({ message: "Credenciais inválidas" });
 
   const senhaCorreta = await bcrypt.compare(senha, user.senha);
