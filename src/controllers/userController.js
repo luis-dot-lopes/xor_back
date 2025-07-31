@@ -1,5 +1,4 @@
 import * as userService from "../services/userService.js";
-import { userSchema } from "../validations/userValidation.js";
 import { handleError } from "../utils/errorHandler.js";
 
 export const create = async (req, res) => {
@@ -25,7 +24,7 @@ export const findById = async (req, res) => {
 
 export const update = async (req, res) => {
   try {
-    const parsed = userSchema.parse(req.body);
+    const parsed = req.body;
     const updated = await userService.updateUser(
       req.params.id,
       req.userId,

@@ -2,11 +2,9 @@ import db from "../models/index.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-import { registerSchema } from "../validations/registerValidation.js";
-
 export const register = async (req, res) => {
   try {
-    const data = registerSchema.parse(req.body);
+    const data = req.body;
 
     const emailExists = await db.Adm.findOne({ where: { email: data.email } });
     if (emailExists)
