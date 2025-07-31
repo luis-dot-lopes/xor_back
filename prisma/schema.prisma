@@ -1,0 +1,102 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Ou 'mysql', 'sqlite', etc.
+  url      = env("DATABASE_URL")
+}
+
+// Seu modelo User
+model User {
+  id        BigInt    @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  nome      String
+  roles     Role[]
+  aluno     Aluno?
+}
+
+// Seu modelo Aluno
+model Aluno {
+  id                BigInt      @id @default(autoincrement())
+  user              User        @relation(fields: [userId], references: [id])
+  userId            BigInt      @unique
+  matricula         String      @unique
+  curso             Curso?      @relation(fields: [cursoId], references: [id])
+  cursoId           BigInt?     @map("curso_id")
+  gradeAtual        Grade?      @relation(fields: [gradeAtualId], references: [id])
+  gradeAtualId      BigInt?     @map("grade_id")
+  dataCadastro      DateTime    @map("data_cadastro") @default(now())
+  semestreAtual     Int?        @map("semestre_atual")
+  nivel             Int?
+  historicoDisciplinas HistoricoDisciplina[]
+  cadeirasAtivas    Disciplina[] @relation("AlunoCadeirasAtivas")
+
+  @@map("alunos")
+}
+
+// Exemplo de como seriam os outros modelos
+model Role {
+  id   Int      @id @default(autoincrement())
+  name String   @unique
+  users User[]
+
+  @@map("roles")
+}
+
+model Curso {
+  id      BigInt   @id @default(autoincrement())
+  nome    String   @map("nome")
+  codigo  String   @unique @map("codigo")
+  unidade String?  @map("unidade")
+  email   String?  @map("email")
+  endereco String? @map("endereco")
+  grades  Grade[]
+  alunos  Aluno[]
+
+  @@map("cursos")
+}
+
+model Grade {
+  id              BigInt       @id @default(autoincrement())
+  codigo          Int          @map("codigo")
+  cargaObrigatoria Int         @map("carga_obrigatoria")
+  cargaOptativa   Int          @map("carga_optativa")
+  disciplinas     Disciplina[]
+  alunos          Aluno[]
+  curso           Curso?       @relation(fields: [cursoId], references: [id]) // Adicionado para a relação Curso-Grade
+  cursoId         BigInt?      @map("curso_id")
+
+  @@map("grades")
+}
+
+model Disciplina {
+  id            BigInt             @id @default(autoincrement())
+  codigo        String             @map("codigo")
+  nome          String             @map("nome")
+  cargaHoraria  Int                @map("carga_horaria")
+  carater       String             @map("carater")
+  semestre      Int                @map("semestre")
+  grades        Grade[]
+  historicos    HistoricoDisciplina[]
+  alunosAtivos  Aluno[]            @relation("AlunoCadeirasAtivas")
+
+  @@map("disciplinas")
+}
+
+model HistoricoDisciplina {
+  id           BigInt    @id @default(autoincrement())
+  aluno        Aluno     @relation(fields: [alunoId], references: [id])
+  alunoId      BigInt
+  disciplina   Disciplina @relation(fields: [disciplinaId], references: [id])
+  disciplinaId BigInt
+  nota         Float?
+  status       String
+  periodoLetivo String?   @map("periodo_letivo")
+
+  @@map("historico_disciplinas")
+  @@unique([alunoId, disciplinaId])
+}
