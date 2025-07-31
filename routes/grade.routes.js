@@ -5,10 +5,10 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, GradeController.createGrade);
-router.get('/', authMiddleware, GradeController.findAllGrades);
-router.get('/:id', authMiddleware, GradeController.findGradeById);
-router.put('/:id', authMiddleware, GradeController.updateGrade);
-router.delete('/:id', authMiddleware, GradeController.deleteGrade);
+router.post('/', GradeController.createGrade);
+router.get('/', GradeController.findAllGrades);
+router.get('/:id', GradeController.findGradeById);
+router.put('/:id', GradeController.updateGrade);
+router.delete('/:id', GradeController.deleteGrade);
 
 export default router;
